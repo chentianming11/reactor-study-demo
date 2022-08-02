@@ -17,7 +17,7 @@ public class PublishOnTest extends AbstractReactorTest {
     public void testNoFuse() {
         delayPublishFlux(1, 10)
                 .publishOn(Schedulers.boundedElastic())
-                .subscribe(this::logInt, (throwable) -> {}, () -> System.out.println(Thread.currentThread().getName()));
+                .subscribe(this::logInt);
         sleep(10000);
     }
 
