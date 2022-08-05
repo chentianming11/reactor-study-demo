@@ -14,10 +14,40 @@ import reactor.core.scheduler.Schedulers;
 public class PublishOnTest extends AbstractReactorTest {
 
     @Test
-    public void testNoFuse() {
-        delayPublishFlux(1, 10)
+    public void testPreFetch() {
+        delayPublishFlux(1000, 1, 5)
+                .doOnRequest(i -> logLong(i, "request"))
+                .publishOn(Schedulers.boundedElastic(), 2)
+                .subscribe(i -> logInt(i, "消费"));
+        sleep(10000);
+    }
+
+    @Test
+    public void testDelayError() {
+        delayPublishFluxError(500, 1, 5)
                 .publishOn(Schedulers.boundedElastic())
-                .subscribe(this::logInt);
+                // 只是为了消费慢一点
+                .doOnNext(i -> sleep(1000))
+                .subscribe(i -> logInt(i, "消费"));
+        sleep(10000);
+    }
+
+    @Test
+    public void testNotDelayError() {
+        delayPublishFluxError(500, 1, 5)
+                .publishOn(Schedulers.boundedElastic(), false, 256)
+                // 只是为了消费慢一点
+                .doOnNext(i -> sleep(1000))
+                .subscribe(i -> logInt(i, "消费"));
+        sleep(10000);
+    }
+
+
+    @Test
+    public void testNoFuse() {
+        delayPublishFlux(1000, 1, 5)
+                .publishOn(Schedulers.boundedElastic())
+                .subscribe(i -> logInt(i, "消费"));
         sleep(10000);
     }
 
@@ -25,7 +55,7 @@ public class PublishOnTest extends AbstractReactorTest {
     public void testSyncFuse() {
         Flux.just(1, 2, 3, 4, 5)
                 .publishOn(Schedulers.boundedElastic())
-                .subscribe(this::logInt);
+                .subscribe(i -> logInt(i, "消费"));
         sleep(10000);
     }
 
@@ -35,7 +65,7 @@ public class PublishOnTest extends AbstractReactorTest {
                 .windowUntil(i -> i % 3 == 0)
                 .publishOn(Schedulers.boundedElastic())
                 .flatMap(Function.identity())
-                .subscribe(this::logInt);
+                .subscribe(i1 -> logInt(i1, "消费"));
         sleep(10000);
     }
 }
