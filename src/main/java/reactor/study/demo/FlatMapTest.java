@@ -1,7 +1,5 @@
 package reactor.study.demo;
 
-import java.time.Duration;
-
 import org.junit.Test;
 
 import reactor.core.publisher.Flux;
@@ -53,8 +51,7 @@ public class FlatMapTest extends AbstractReactorTest {
         delayPublishFlux(100, 1, 6)
                 .flatMap((i) -> flat(10, i)
                         .publishOn(Schedulers.newElastic("inner"))
-                        // publishOn()后面至少要有一个操作符才会异步。
-                        // 故意让下游执行慢一点，演示出交错效果
+                        // 故意让下游执行慢一点
                         .doOnNext(x -> sleep(1000)), 3, 2)
                 .subscribe(i -> logInt(i, "消费"));
         sleep(10000);
@@ -64,13 +61,12 @@ public class FlatMapTest extends AbstractReactorTest {
     public void testSubscribeOnPublishOn() {
         delayPublishFlux(100, 1, 6)
                 .flatMap((i) -> flat(1000, i)
-                        .subscribeOn(Schedulers.newElastic("inner-sub"))
                         .publishOn(Schedulers.newElastic("inner-pub"))
-                        // publishOn()后面至少要有一个操作符才会异步。
-                        // 故意让下游执行慢一点，演示出交错效果
-                        .doOnNext(x -> sleep(1000)), 3, 2)
+                        // 故意让下游执行慢一点
+                        .doOnNext(x -> sleep(1000))
+                        .subscribeOn(Schedulers.newElastic("inner-sub")), 30, 2)
                 .subscribe(i -> logInt(i, "消费"));
-        sleep(10000);
+        sleep(20000);
     }
 
     @Test
