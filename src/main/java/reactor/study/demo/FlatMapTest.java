@@ -19,6 +19,10 @@ public class FlatMapTest extends AbstractReactorTest {
         return Flux.range(i * 10, 4);
     }
 
+    public Flux<Integer> flatJust(int i) {
+        return Flux.just(i * 10);
+    }
+
     @Test
     public void test() {
         delayPublishFlux(100, 1, 6)
@@ -95,6 +99,15 @@ public class FlatMapTest extends AbstractReactorTest {
                 .flatMap((i) -> flatRange(i).publishOn(Schedulers.newElastic("inner")), 3, 2)
                 .subscribe(i -> logInt(i, "消费"));
         sleep(10000);
+    }
+
+    @Test
+    public void testCallablePublisher() {
+        delayPublishFlux(10, 1, 10)
+                .flatMap((i) -> flatJust(i), 3, 2)
+                .doOnNext(x -> sleep(100))
+                .subscribe(i -> logInt(i, "消费"));
+        sleep(100000);
     }
 
 }
