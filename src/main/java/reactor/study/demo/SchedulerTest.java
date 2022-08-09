@@ -67,15 +67,35 @@ public class SchedulerTest extends AbstractReactorTest {
         sleep(10000);
     }
 
+    @Test
+    public void testParallel() {
+        Scheduler.Worker worker = Schedulers.parallel().createWorker();
+        for (int i = 0; i < 10; i++) {
+            worker.schedule(new Task(i, 1000));
+        }
+        sleep(10000);
+    }
+
+
+
 
 
     @Test
     public void test() {
-        delayPublishFlux(10, 1, 10)
-                .publishOn(Schedulers.fromExecutorService(Executors.newFixedThreadPool(10)))
+        delayPublishFlux(10, 1, 100)
+                .publishOn(Schedulers.fromExecutorService(Executors.newFixedThreadPool(100)))
                 .doOnNext(x -> sleep(1000))
                 .subscribe(i -> logInt(i, "消费"));
-        sleep(10000);
+        sleep(100000);
+    }
+
+    @Test
+    public void test2() {
+        delayPublishFlux(10, 1, 100)
+                .publishOn(Schedulers.boundedElastic())
+                .doOnNext(x -> sleep(1000))
+                .subscribe(i -> logInt(i, "消费"));
+        sleep(100000);
     }
 
 
