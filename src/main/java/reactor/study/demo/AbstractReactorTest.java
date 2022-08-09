@@ -48,27 +48,6 @@ public class AbstractReactorTest {
     }
 
 
-    protected Flux<String> delayPublishFlux(String... strings) {
-        return Flux.create(fluxSink -> {
-            for (String string : strings) {
-                fluxSink.next(string);
-                sleep(1000);
-            }
-            fluxSink.complete();
-        });
-    }
-
-    protected Flux<Character> delayPublishCharacter(String s) {
-        return Flux.create(fluxSink -> {
-            for (char c : s.toCharArray()) {
-                fluxSink.next(c);
-                sleep(1000);
-            }
-            fluxSink.complete();
-        });
-    }
-
-
     @SneakyThrows
     protected void sleep(long millis) {
         if (millis <= 0) {
@@ -85,10 +64,5 @@ public class AbstractReactorTest {
     protected void logLong(long i, String action) {
         String time = DateFormatUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss:SSS");
         System.out.println(time + " " + Thread.currentThread().getName() + " " + action + " " + i);
-    }
-
-    protected void logChar(char c) {
-        String time = DateFormatUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss:SSS");
-        System.out.println(time + " " + Thread.currentThread().getName() + " " + c);
     }
 }
